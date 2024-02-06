@@ -33,16 +33,16 @@ private:
 };
 
 template <typename T>
-class Relaxed_Edge {
+class Relaxed_Edge { // should this be renamed as `Reference_Edge`?
     using Converter_Function = T (*)(const void*);
 public:
     template <typename TT>
-    Relaxed_Edge(const Edge<TT>& o) {
-        reference = static_cast<const void*>(&o);
-        converter = +[](const void* p) -> T {
+    Relaxed_Edge(const Edge<TT>& o) :
+        reference { static_cast<const void*>(&o) },
+        converter { +[](const void* p) -> T {
             static_assert(std::is_convertible_v<TT, T>, "Must be convertible to other type");
             return static_cast<const Edge<TT>*>(p)->get();
-        };
+        }} {
     }
 
     T get() const { return converter(reference); }
