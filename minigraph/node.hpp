@@ -2,8 +2,11 @@
 
 namespace mini {
 
-struct Node {
-
+template<typename T>
+class Node {
+public:
+private:
+    T internal_callable;
 };
 
 }

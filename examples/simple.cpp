@@ -21,5 +21,17 @@ int main(int argc, char** argv) {
     assert(y1.get() == 4);
     std::cout << "hello world" << std::endl;
 
+    // only for c++17
+    if (__cplusplus == 202101L) std::cout << "C++23";
+    else if (__cplusplus == 202002L) std::cout << "C++20";
+    else if (__cplusplus == 201703L) std::cout << "C++17";
+    else if (__cplusplus == 201402L) std::cout << "C++14";
+    else if (__cplusplus == 201103L) std::cout << "C++11";
+    else if (__cplusplus == 199711L) std::cout << "C++98";
+    else std::cout << "pre-standard C++." << __cplusplus;
+    std::cout << "\n";
+
+    auto e = mini::Edge(1);
+    std::cout << std::boolalpha << std::is_same_v<typename decltype(e)::value_type, int> << std::endl;
     return 0;
 }
