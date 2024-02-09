@@ -1,5 +1,6 @@
 import subprocess
 import os
+import sys
 import glob
 
 # TODO: check if cl exists
@@ -25,7 +26,6 @@ class Target:
         self.args.append(f"/Fe:build/{target}/")
 
     def __call__(self):
-        #print(f"running {self.args}")
         subprocess.run(self.args)
 
 class SingleTarget(Target):
@@ -51,11 +51,32 @@ class Solution:
         for f in files:
             subprocess.run([f])
 
+# clean garbage up
+def process_args(argv):
+    should_build_test = False
+    should_build_examples = False
+    #all flags present if no args are being passed.
+    if len(argv) == 0:
+        should_build_examples = True
+        should_build_test = True
+    for f in argv:
+        if f == "examples":
+            should_build_examples = True
+        if f == "test":
+            should_build_test = True
+    return should_build_test, should_build_examples
+
 if __name__ == "__main__":
+    should_build_tests, should_build_examples = process_args(sys.argv[1:])
+
     solution = Solution()
-    # print("BUILDING EXAMPLES")
-    # solution.build("examples")
-    print("BUILDING TESTS")
-    solution.build("test")
-    print("RUNNING TESTS")
-    solution.run("test")
+    if should_build_examples:
+        print("BUILDING EXAMPLES")
+        solution.build("examples")
+
+    if should_build_tests:
+        print("BUILDING TESTS")
+        solution.build("test")
+        print("RUNNING TESTS")
+        solution.run("test")
+

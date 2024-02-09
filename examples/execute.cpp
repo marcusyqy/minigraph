@@ -17,8 +17,7 @@ struct Multiply {
 
 int main(int argc, char** argv) {
     using namespace mini;
-    // only for c++17
-#if __cplusplus >= 201703L // if more than c++17
+    // stable API so we don't need C++17
     auto x = edge(0.0);
     auto y = edge(0.0);
     auto z = edge(0.0);
@@ -30,8 +29,6 @@ int main(int argc, char** argv) {
 
     // auto [add_result] = node<Add>(x, y);
     // auto [mul_result] = node<Multiply>(z, add_result);
-
-#endif
     std::cout << "hello" << std::endl;
     
     return 0;

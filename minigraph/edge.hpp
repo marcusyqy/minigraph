@@ -1,6 +1,7 @@
 #pragma once
 #include <type_traits>
 #include <utility>
+#include "meta.hpp"
 
 namespace mini {
 
@@ -18,6 +19,30 @@ public:
     reference get() { return value; }
     const_reference get() const { return value; }
 
+    Edge() = default;
+
+    template <typename... Args>
+    Edge(Args&&... args) : value{ std::forward<Args&&>(args)... } {}
+
+    template <typename TT, bool = std::is_same_v<TT, T> || std::is_convertible_v<TT, T>>
+    Edge(const Edge<TT>& o) : value{ o.value } {}
+
+    template <typename TT, bool = std::is_same_v<TT, T> || std::is_convertible_v<TT, T>>
+    Edge(Edge<TT>&& o) : value{ std::move(o.value) } {}
+
+    template <typename TT, bool = std::is_same_v<TT, T> || std::is_convertible_v<TT, T>>
+    Edge& operator=(const Edge<TT>& o) {
+        value = o.value;
+        return *this;
+    }
+
+    template <typename TT, bool = std::is_same_v<TT, T> || std::is_convertible_v<TT, T>>
+    Edge& operator=(Edge<TT>&& o) {
+        value = std::move(o.value);
+        return *this;
+    }
+
+    // actual types
     Edge(const T& o) : value{ o } {}
     Edge(T&& o) : value{ std::move(o) } {}
     Edge& operator=(const T& o) {
@@ -30,30 +55,18 @@ public:
     }
 
 private:
+    template <typename TT>
+    friend class Edge;
     T value;
 };
 
-#if __cplusplus >= 201703L // if more than c++17
-template <typename T>
-Edge(T a) -> Edge<T>;
-#endif
-
-template<typename T>
-Edge<T> edge(const T& o) {
-    return Edge<T>(o);
-}
-
-template<typename T>
-Edge<T> edge(T&& o) {
-    return Edge<T>(std::move(o));
-}
 
 template <typename T>
 class Relaxed_Edge { // should this be renamed as `Reference_Edge`?
     using Converter_Function = T (*)(const void*);
 
 public:
-    template <typename TT>
+    template <typename TT> 
     Relaxed_Edge(const Edge<TT>& o) :
         reference{ static_cast<const void*>(&o) }, converter{ +[](const void* p) -> T {
             // @TODO(Marcus): we should make the error message in this portion better.
@@ -67,5 +80,26 @@ private:
     const void* reference;
     Converter_Function converter;
 };
+
+// API
+#if __cplusplus >= 201703L // if more than c++17
+template <typename T>
+Edge(T a) -> Edge<T>;
+#endif
+
+template <typename T>
+Edge<T> edge(const T& o) {
+    return Edge<T>(o);
+}
+
+template <typename T, typename... Args>
+Edge<T> edge(Args&&... args) {
+    return Edge<T>(std::forward<Args&&>(args)...);
+}
+
+template <typename T>
+Edge<T> edge(T&& o) {
+    return Edge<T>(std::move(o));
+}
 
 } // namespace mini
