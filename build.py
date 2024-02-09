@@ -96,4 +96,6 @@ if __name__ == "__main__":
     if should_format_repo:
         print("FORMATTING")
         solution.format("minigraph")
+        solution.format("examples")
+        solution.format("test")
 

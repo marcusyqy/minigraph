@@ -1,6 +1,6 @@
 #include "../minigraph/edge.hpp"
-#include <iostream>
 #include <cassert>
+#include <iostream>
 
 struct Convertible_To_Int {
     float value;
@@ -12,9 +12,9 @@ struct Not_Convertible_To_Int {
 };
 
 int main(int argc, char** argv) {
-    mini::Edge<Convertible_To_Int> x1{Convertible_To_Int{4.1f}};
-    mini::Edge<Not_Convertible_To_Int> x2{Not_Convertible_To_Int{4.1f}};
-    mini::Relaxed_Edge<int> y1 {x1};
+    mini::Edge<Convertible_To_Int> x1{ Convertible_To_Int{ 4.1f } };
+    mini::Edge<Not_Convertible_To_Int> x2{ Not_Convertible_To_Int{ 4.1f } };
+    mini::Relaxed_Edge<int> y1{ x1 };
     // mini::Relaxed_Edge<int> y2 {x2};  // (NC)
 
     std::cout << y1.get() << std::endl;
@@ -24,11 +24,11 @@ int main(int argc, char** argv) {
     auto e = mini::edge(1);
     auto b = mini::edge(2);
     std::cout << std::boolalpha << std::is_same_v<typename decltype(e)::value_type, int> << std::endl;
-    
+
     e = x1;
     b = e;
 
-    auto bb {e};
+    auto bb{ e };
 
     return 0;
 }
