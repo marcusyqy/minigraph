@@ -52,12 +52,12 @@ class Solution:
             subprocess.run([f])
 
     def format(self, target):
-        files = glob.glob(f"{target}/**.hpp")
-        for f in files:
-            subprocess.run(['clang-format', '-i', f])
-        files = glob.glob(f"{target}/**.cpp")
-        for f in files:
-            subprocess.run(['clang-format', '-i', f])
+        cmd = ['clang-format', '-i', '--verbose']
+        for f in glob.glob(f"{target}/**.hpp"):
+            cmd.append(f)
+        for f in glob.glob(f"{target}/**.cpp"):
+            cmd.append(f)
+        subprocess.run(cmd)
 
 # clean garbage up
 def process_args(argv):
