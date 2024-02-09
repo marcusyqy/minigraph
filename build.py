@@ -51,23 +51,36 @@ class Solution:
         for f in files:
             subprocess.run([f])
 
+    def format(self, target):
+        files = glob.glob(f"{target}/**.hpp")
+        for f in files:
+            subprocess.run(['clang-format', '-i', f])
+        files = glob.glob(f"{target}/**.cpp")
+        for f in files:
+            subprocess.run(['clang-format', '-i', f])
+
 # clean garbage up
 def process_args(argv):
     should_build_test = False
     should_build_examples = False
+    should_format_repo = False
     #all flags present if no args are being passed.
     if len(argv) == 0:
         should_build_examples = True
         should_build_test = True
+
     for f in argv:
         if f == "examples":
             should_build_examples = True
         if f == "test":
             should_build_test = True
-    return should_build_test, should_build_examples
+        if f == "format":
+            should_format_repo = True
+
+    return should_build_test, should_build_examples, should_format_repo
 
 if __name__ == "__main__":
-    should_build_tests, should_build_examples = process_args(sys.argv[1:])
+    should_build_tests, should_build_examples, should_format_repo = process_args(sys.argv[1:])
 
     solution = Solution()
     if should_build_examples:
@@ -79,4 +92,8 @@ if __name__ == "__main__":
         solution.build("test")
         print("RUNNING TESTS")
         solution.run("test")
+
+    if should_format_repo:
+        print("FORMATTING")
+        solution.format("minigraph")
 

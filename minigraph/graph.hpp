@@ -1,9 +1,8 @@
 #pragma once
 #include "edge.hpp"
 #include "node.hpp"
-#include <vector>
 #include <memory>
-
+#include <vector>
 
 namespace mini {
 
@@ -13,4 +12,4 @@ public:
 private:
 };
 
-}
+} // namespace mini

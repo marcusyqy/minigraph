@@ -1,7 +1,7 @@
 #pragma once
+#include "meta.hpp"
 #include <type_traits>
 #include <utility>
-#include "meta.hpp"
 
 namespace mini {
 
@@ -60,13 +60,10 @@ private:
     T value;
 };
 
-
 template <typename T>
 class Relaxed_Edge { // should this be renamed as `Reference_Edge`?
-    using Converter_Function = T (*)(const void*);
-
 public:
-    template <typename TT> 
+    template <typename TT>
     Relaxed_Edge(const Edge<TT>& o) :
         reference{ static_cast<const void*>(&o) }, converter{ +[](const void* p) -> T {
             // @TODO(Marcus): we should make the error message in this portion better.
@@ -78,6 +75,7 @@ public:
 
 private:
     const void* reference;
+    using Converter_Function = T (*)(const void*);
     Converter_Function converter;
 };
 

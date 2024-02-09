@@ -5,7 +5,7 @@ namespace mini {
 
 namespace meta {
 
-template<typename T>
+template <typename T>
 class Node {
 public:
 private:
@@ -13,10 +13,9 @@ private:
 };
 
 // make a tuple-like check for the struct
-template<typename T, typename I, typename ... Args>
-decltype(auto) node(I, Args&&... args) {
-}
+template <typename T, typename I, typename... Args>
+decltype(auto) node(I, Args&&... args) {}
 
-}
+} // namespace meta
 
-}
+} // namespace mini
