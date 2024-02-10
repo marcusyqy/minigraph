@@ -1,5 +1,5 @@
 # Milestone 1 (API design)
-- [ ] 
+- [ ] Populate TODO list.
 
 # Milestone 2 (Functionality & Testing)
 - [ ] 

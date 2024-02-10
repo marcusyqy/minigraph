@@ -2,11 +2,28 @@ import subprocess
 import os
 import sys
 import glob
+import shutil
 
 # TODO: check if cl exists
-compiler = [ "cl"] 
+compiler = "cl" 
 # "/Fe:build/", "/Fo:build/",  moved into body
-flags = [ "/EHsc", "/std:c++17", "/Zc:__cplusplus" ]
+flags = [ "/std:c++17", "/Zc:__cplusplus", "/wd4530" ]
+
+def which(program):
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ.get("PATH", "").split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
 
 def create_dir_if_dir_doesnt_exists(name):
     if os.path.exists(name) and not os.path.isdir(name):
@@ -16,7 +33,7 @@ def create_dir_if_dir_doesnt_exists(name):
 
 class Target:
     def __init__(self, target, files):
-        self.args = compiler.copy()
+        self.args = [compiler]
         for f in files:
             self.args.append(f)
         for f in flags:
@@ -81,6 +98,12 @@ def process_args(argv):
 
 if __name__ == "__main__":
     should_build_tests, should_build_examples, should_format_repo = process_args(sys.argv[1:])
+
+    # check if compiler exists
+    compiler_file_path = shutil.which(compiler)
+    if (should_build_tests or should_build_examples) and compiler_file_path == None:
+        print(f"compiler `{compiler}` does not exist. Did you forget to source it?")
+        exit(1)
 
     solution = Solution()
     if should_build_examples:
