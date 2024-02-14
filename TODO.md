@@ -1,5 +1,6 @@
 # Milestone 0 (Get Linux Support)
-- [ ]  Support linux build.
+- [ ] Support linux build.
+- [ ] Support linux macros.
 
 # Milestone 1 (API design)
 - [ ] Populate TODO list.
