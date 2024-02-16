@@ -1,6 +1,8 @@
 #pragma once
 #include <tuple>
 #include <type_traits>
+#include <cstdint>
+#include <cstdlib>
 
 namespace mini {
 namespace meta {

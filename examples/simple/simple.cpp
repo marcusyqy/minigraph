@@ -1,4 +1,4 @@
-#include "../minigraph/edge.hpp"
+#include "../../minigraph/edge.hpp"
 #include <cassert>
 #include <iostream>
 

@@ -1,5 +1,5 @@
-#include "../minigraph/edge.hpp"
-#include "../minigraph/node.hpp"
+#include "../../minigraph/edge.hpp"
+#include "../../minigraph/node.hpp"
 #include <cassert>
 #include <iostream>
 
@@ -24,9 +24,9 @@ int main(int argc, char** argv) {
     auto i = edge<double>(aa);
     auto m = edge<double>(aa);
 
-    auto add_node = node<Add>({x, y});
-    auto [add_result] = add_node.edges();
-    auto mul_node = node<Multiply>({z, add_result});
+    // auto add_node = node<Add>({x, y});
+    // auto [add_result] = add_node.edges();
+    // auto mul_node = node<Multiply>({z, add_result});
 
     std::cout << "hello" << std::endl;
 
