@@ -4,6 +4,7 @@ MAKEFLAGS+=-r -j
 # Directories
 BUILD_DIR := build
 BIN_DIR := bin
+EXAMPLES := examples
 EXAMPLES_DIR := examples
 TESTS_DIR := tests
 MINIGRAPH_DIR := minigraph
@@ -26,7 +27,9 @@ CXXFLAGS := -Wall -Wextra -std=c++17
 EXAMPLE_TARGETS_FULL := $(patsubst $(EXAMPLES_DIR)/%/,$(BIN_DIR)/$(EXAMPLES_DIR)/%,$(dir $(EXAMPLE_SRCS)))
 
 # Targets
-all: $(EXAMPLE_TARGETS_FULL) $(BIN_DIR)/test 
+all: $(EXAMPLES) $(BIN_DIR)/test 
+
+$(EXAMPLES): $(EXAMPLE_TARGETS_FULL)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
