@@ -27,38 +27,33 @@ CXXFLAGS := -Wall -Wextra -std=c++17
 EXAMPLE_TARGETS_FULL := $(patsubst $(EXAMPLES_DIR)/%/,$(BIN_DIR)/$(EXAMPLES_DIR)/%,$(dir $(EXAMPLE_SRCS)))
 
 # Targets
-all: $(EXAMPLES) $(BIN_DIR)/test 
+all: $(EXAMPLES) test 
 
 $(EXAMPLES): $(EXAMPLE_TARGETS_FULL)
 
 $(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)
 $(BIN_DIR):
-	mkdir -p $(BIN_DIR)
+	@mkdir -p $(BIN_DIR)
 
-$(BUILD_DIR)/tests:
-	mkdir -p $(BUILD_DIR)/tests
-$(BIN_DIR)/tests:
-	mkdir -p $(BIN_DIR)/tests
+$(BUILD_DIR)/$(TESTS_DIR): $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)/$(TESTS_DIR)
+# $(BIN_DIR)/tests:
+# 	mkdir -p $(BIN_DIR)/tests
 
-$(BUILD_DIR)/examples:
-	mkdir -p $(BUILD_DIR)/examples
-$(BIN_DIR)/examples:
-	mkdir -p $(BIN_DIR)/examples
+$(BUILD_DIR)/$(EXAMPLES_DIR):$(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)/examples
+$(BIN_DIR)/$(EXAMPLES_DIR):$(BIN_DIR)
+	@mkdir -p $(BIN_DIR)/examples
 
 # Compile source files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-# $(BUILD_DIR)/$(EXAMPLES_DIR)/%.o: $(EXAMPLES_DIR)/%.cpp $$(MINIGRAPH_HDRS) | $(BUILD_DIR)/examples
+# $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 # 	$(CXX) $(CXXFLAGS) -c $< -o $@
-$(BUILD_DIR)/tests/%.o: $(TESTS_DIR)/%.cpp $$(MINIGRAPH_HDRS) | $(BUILD_DIR)/tests
+$(BUILD_DIR)/$(TESTS_DIR)/%.o: $(TESTS_DIR)/%.cpp | $(BUILD_DIR)/$(TESTS_DIR) $(MINIGRAPH_HDRS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Generate a list of targets for each subdirectory in EXAMPLES_DIR
 EXAMPLE_TARGETS := $(patsubst $(EXAMPLES_DIR)/%/,%,$(dir $(EXAMPLE_SRCS)))
-
-echo: 
-	@echo $(EXAMPLE_TARGETS)
 
 # Rule to build each example target
 define EXAMPLE_RULE
@@ -71,8 +66,8 @@ endef
 $(foreach example,$(EXAMPLE_TARGETS),$(eval $(call EXAMPLE_RULE,$(example))))
 
 # Link executables
-$(BIN_DIR)/test: $(TEST_OBJS) | $(BIN_DIR)
-	$(CXX) $(TEST_OBJS) -o $@
+test: $(TEST_OBJS) | $(BIN_DIR)
+	$(CXX) $(TEST_OBJS) -o $(BIN_DIR)/$@
 
 # Clean target
 clean:
