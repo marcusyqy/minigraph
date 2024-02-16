@@ -6,6 +6,7 @@ BUILD_DIR := build
 BIN_DIR := bin
 EXAMPLES := examples
 EXAMPLES_DIR := examples
+TESTS := tests
 TESTS_DIR := tests
 MINIGRAPH_DIR := minigraph
 
@@ -27,7 +28,7 @@ CXXFLAGS := -Wall -Wextra -std=c++17
 EXAMPLE_TARGETS_FULL := $(patsubst $(EXAMPLES_DIR)/%/,$(BIN_DIR)/$(EXAMPLES_DIR)/%,$(dir $(EXAMPLE_SRCS)))
 
 # Targets
-all: $(EXAMPLES) test 
+all: $(EXAMPLES) $(TESTS) 
 
 $(EXAMPLES): $(EXAMPLE_TARGETS_FULL)
 
@@ -47,8 +48,8 @@ $(BIN_DIR)/$(EXAMPLES_DIR):$(BIN_DIR)
 	@mkdir -p $(BIN_DIR)/examples
 
 # Compile source files
-# $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
-# 	$(CXX) $(CXXFLAGS) -c $< -o $@
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 $(BUILD_DIR)/$(TESTS_DIR)/%.o: $(TESTS_DIR)/%.cpp | $(BUILD_DIR)/$(TESTS_DIR) $(MINIGRAPH_HDRS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
@@ -66,7 +67,7 @@ endef
 $(foreach example,$(EXAMPLE_TARGETS),$(eval $(call EXAMPLE_RULE,$(example))))
 
 # Link executables
-test: $(TEST_OBJS) | $(BIN_DIR)
+$(TESTS): $(TEST_OBJS) | $(BIN_DIR)
 	$(CXX) $(TEST_OBJS) -o $(BIN_DIR)/$@
 
 # Clean target
