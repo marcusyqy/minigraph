@@ -1,5 +1,5 @@
-#include "../../minigraph/edge.hpp"
-#include "../../minigraph/node.hpp"
+#include "minigraph/edge.hpp"
+#include "minigraph/node.hpp"
 #include <cassert>
 #include <iostream>
 

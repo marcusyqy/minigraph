@@ -1,4 +1,0 @@
-If:
-  PathMatch: [.*\.cpp, .*\.hpp]
-CompileFlags:
-  Add: [-std=c++17]

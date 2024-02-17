@@ -10,6 +10,8 @@ TESTS := tests
 TESTS_DIR := tests
 MINIGRAPH_DIR := minigraph
 
+INCLUDES := -I.
+
 # Source files
 EXAMPLE_SRCS := $(wildcard $(EXAMPLES_DIR)/**/*.cpp)
 TEST_SRCS := $(wildcard $(TESTS_DIR)/*.cpp)
@@ -49,9 +51,9 @@ $(BIN_DIR)/$(EXAMPLES_DIR):$(BIN_DIR)
 
 # Compile source files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c $< -o $@
 $(BUILD_DIR)/$(TESTS_DIR)/%.o: $(TESTS_DIR)/%.cpp | $(BUILD_DIR)/$(TESTS_DIR) $(MINIGRAPH_HDRS)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c $< -o $@
 
 # Generate a list of targets for each subdirectory in EXAMPLES_DIR
 EXAMPLE_TARGETS := $(patsubst $(EXAMPLES_DIR)/%/,%,$(dir $(EXAMPLE_SRCS)))
@@ -60,7 +62,7 @@ EXAMPLE_TARGETS := $(patsubst $(EXAMPLES_DIR)/%/,%,$(dir $(EXAMPLE_SRCS)))
 define EXAMPLE_RULE
 $$(BUILD_DIR)/$(EXAMPLES_DIR)/$(1)/%.o: $(EXAMPLES_DIR)/$(1)/%.cpp  | $$(BUILD_DIR)/$$(EXAMPLES_DIR) $$(MINIGRAPH_HDRS)
 	@mkdir -p $$(BUILD_DIR)/$$(EXAMPLES_DIR)/$(1)
-	$$(CXX) $(CXXFLAGS) -c $$< -o $$@
+	$$(CXX) $(INCLUDES) $(CXXFLAGS) -c $$< -o $$@
 $$(BIN_DIR)/$(EXAMPLES_DIR)/$(1): $$(patsubst $$(EXAMPLES_DIR)/$(1)/%.cpp,$$(BUILD_DIR)/examples/$(1)/%.o,$$(wildcard $$(EXAMPLES_DIR)/$(1)/*.cpp)) | $$(BIN_DIR)/$$(EXAMPLES_DIR)
 	$$(CXX) $$^ -o $$@
 endef
