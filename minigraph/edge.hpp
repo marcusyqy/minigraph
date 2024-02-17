@@ -90,6 +90,11 @@ Edge<T> edge(const T& o) {
     return Edge<T>(o);
 }
 
+template <typename T>
+Edge<T> edge(T& o) {
+    return Edge<T>(o);
+}
+
 template <typename T, typename... Args>
 Edge<T> edge(Args&&... args) {
     return Edge<T>(std::forward<Args&&>(args)...);

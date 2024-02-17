@@ -13,6 +13,13 @@ MINIGRAPH_DIR := minigraph
 INCLUDES := -I.
 
 # Source files
+SRCS := $(wildcard **/*.cpp)
+HDRS := $(wildcard **/*.hpp)
+
+# Formatting tool
+CLANG_FORMAT := clang-format
+
+# Source files
 EXAMPLE_SRCS := $(wildcard $(EXAMPLES_DIR)/**/*.cpp)
 TEST_SRCS := $(wildcard $(TESTS_DIR)/*.cpp)
 MINIGRAPH_HDRS := $(wildcard $(MINIGRAPH_DIR)/*.hpp)
@@ -75,6 +82,10 @@ $(TESTS): $(TEST_OBJS) | $(BIN_DIR)
 # Clean target
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR)
+
+# ty ChatGPT
+format:
+	@find . -type f \( -name "*.cpp" -o -name "*.hpp" \) -exec $(CLANG_FORMAT) -i {} +
 
 # PHONY targets
 .PHONY: all clean

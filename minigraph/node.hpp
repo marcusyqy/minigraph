@@ -50,14 +50,13 @@ using Node_Output = Type_List_To_Tuple<Decorate_Type_List_With_Edge<Params<T>>>;
 template <typename T>
 class Node {
 public:
-    template<typename... Args>
-    Node(meta::detail::Node_Input<T> o, Args&&... args) : callable{std::forward<Args&&>(args)...}, inputs{o}, outputs{} {
-    }
+    template <typename... Args>
+    Node(meta::detail::Node_Input<T> o, Args&&... args) :
+        callable{ std::forward<Args&&>(args)... }, inputs{ o }, outputs{} {}
 
-    void operator()() {
-    }
+    void operator()() {}
 
-    meta::detail::Node_Output<T>& edges() const noexcept { return outputs;}
+    meta::detail::Node_Output<T>& edges() const noexcept { return outputs; }
 
 private:
     T callable;
@@ -68,7 +67,7 @@ private:
 // make a tuple-like check for the struct
 template <typename T, typename... Args>
 decltype(auto) node(meta::detail::Node_Input<T> o, Args&&... args) {
-    return Node<T>{o, std::forward<Args&&>(args)...};
+    return Node<T>{ o, std::forward<Args&&>(args)... };
 }
 
 } // namespace mini
