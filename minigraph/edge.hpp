@@ -105,4 +105,10 @@ Edge<T> edge(T&& o) {
     return Edge<T>(std::move(o));
 }
 
+template <typename T, typename TT>
+Relaxed_Edge<T> edge_cast(const Edge<TT>& o) {
+    static_assert(std::is_convertible_v<TT, T>, "Type put in edge cast not convertible");
+    return Relaxed_Edge<T>(o);
+}
+
 } // namespace mini

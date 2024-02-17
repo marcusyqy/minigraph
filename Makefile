@@ -59,7 +59,7 @@ $(BIN_DIR)/$(EXAMPLES_DIR):$(BIN_DIR)
 # Compile source files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	$(CXX) $(INCLUDES) $(CXXFLAGS) -c $< -o $@
-$(BUILD_DIR)/$(TESTS_DIR)/%.o: $(TESTS_DIR)/%.cpp | $(BUILD_DIR)/$(TESTS_DIR) $(MINIGRAPH_HDRS)
+$(BUILD_DIR)/$(TESTS_DIR)/%.o: $(TESTS_DIR)/%.cpp $(MINIGRAPH_HDRS) | $(BUILD_DIR)/$(TESTS_DIR) 
 	$(CXX) $(INCLUDES) $(CXXFLAGS) -c $< -o $@
 
 # Generate a list of targets for each subdirectory in EXAMPLES_DIR
@@ -67,7 +67,7 @@ EXAMPLE_TARGETS := $(patsubst $(EXAMPLES_DIR)/%/,%,$(dir $(EXAMPLE_SRCS)))
 
 # Rule to build each example target
 define EXAMPLE_RULE
-$$(BUILD_DIR)/$(EXAMPLES_DIR)/$(1)/%.o: $(EXAMPLES_DIR)/$(1)/%.cpp  | $$(BUILD_DIR)/$$(EXAMPLES_DIR) $$(MINIGRAPH_HDRS)
+$$(BUILD_DIR)/$(EXAMPLES_DIR)/$(1)/%.o: $(EXAMPLES_DIR)/$(1)/%.cpp  $$(MINIGRAPH_HDRS) | $$(BUILD_DIR)/$$(EXAMPLES_DIR) 
 	@mkdir -p $$(BUILD_DIR)/$$(EXAMPLES_DIR)/$(1)
 	$$(CXX) $(INCLUDES) $(CXXFLAGS) -c $$< -o $$@
 $$(BIN_DIR)/$(EXAMPLES_DIR)/$(1): $$(patsubst $$(EXAMPLES_DIR)/$(1)/%.cpp,$$(BUILD_DIR)/examples/$(1)/%.o,$$(wildcard $$(EXAMPLES_DIR)/$(1)/*.cpp)) | $$(BIN_DIR)/$$(EXAMPLES_DIR)

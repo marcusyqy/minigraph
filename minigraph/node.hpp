@@ -61,7 +61,13 @@ public:
     // @TODO: add outputs intitalization.
     template <typename... Args>
     Node(meta::detail::Node_Input<T> o, Args&&... args) :
-        callable{ std::forward<Args&&>(args)... }, inputs{ o }, outputs{} {}
+        callable{ std::forward<Args&&>(args)... }, inputs{ o }, outputs{
+            init(
+                callable,
+                inputs,
+                std::make_index_sequence<meta::detail::Params<T>::size>{},
+                std::make_index_sequence<meta::detail::Returns<T>::size>{})
+        } {}
 
     void operator()() {
         apply(
@@ -78,10 +84,24 @@ private:
         auto immediate = callable(std::get<Is>(inputs).get()...);
         // @TODO: we have to change
         if constexpr (meta::is_tuple_like<meta::detail::Return_Type<T>>) {
-            (..., [&] { meta::get<Os>(outputs) = meta::get<Os>(immediate); }());
+            (..., static_cast<void>(meta::get<Os>(outputs) = meta::get<Os>(immediate)));
         } else {
             meta::get<0>(outputs) = immediate;
         }
+    }
+
+    template <size_t... Is, size_t... Os>
+    static decltype(auto)
+        init(T& callable, meta::detail::Node_Input<T>& inputs, std::index_sequence<Is...>, std::index_sequence<Os...>) {
+        auto immediate                       = callable(std::get<Is>(inputs).get()...);
+        meta::detail::Node_Output<T> outputs = {};
+        // @TODO: we have to change
+        if constexpr (meta::is_tuple_like<meta::detail::Return_Type<T>>) {
+            (..., static_cast<void>(meta::get<Os>(outputs) = meta::get<Os>(immediate)));
+        } else {
+            meta::get<0>(outputs) = immediate;
+        }
+        return outputs;
     }
 
 private:
