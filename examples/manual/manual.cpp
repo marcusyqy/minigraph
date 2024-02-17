@@ -34,6 +34,19 @@ int main(int argc, char** argv) {
     std::cout << "(x+y)*z : " << mul_result.get() << std::endl;
     std::cout << "=============================================================" << std::endl;
 
+    x = 4.0;
+    y = 8.0;
+
+    std::cout << "before add change to x and y" << std::endl;
+    std::cout << "=============================================================" << std::endl;
+    std::cout << "x : " << x.get() << std::endl;
+    std::cout << "y : " << y.get() << std::endl;
+    std::cout << "z : " << z.get() << std::endl;
+    std::cout << "x+y : " << add_result.get() << std::endl;
+    std::cout << "(x+y)*z : " << mul_result.get() << std::endl;
+    std::cout << "=============================================================" << std::endl;
+
+
     add_node();
     std::cout << "after add:before mul" << std::endl;
     std::cout << "=============================================================" << std::endl;
