@@ -23,18 +23,39 @@ public:
         connect<F_Ptr>(typed_reference);
     }
 
+    template <auto F_Ptr>
+    Delegate(Connect_Arg<F_Ptr>) {
+        connect<F_Ptr>();
+    }
+
     template <typename R>
     Delegate(R& typed_reference) {
         connect(typed_reference);
     }
 
     template <typename R>
+    void connect(R& v) noexcept {
+        connect_impl<>(v);
+    }
+
+    template <auto F_Ptr, typename R>
+    void connect(R& v) noexcept {
+        connect_impl<F_Ptr>(v);
+    }
+
+    template <auto F_Ptr>
+    void connect() {
+        reference = nullptr;
+        function  = [](const void*, As... as) { return std::invoke(F_Ptr, std::forward<As>(as)...); };
+    }
+
+    template <typename R>
     Delegate(T (*fn)(As...)) : function(fn) {}
 
-    Delegate()                                 = default;
-    Delegate(const Delegate& o)                = default;
-    Delegate(Delegate&& o) noexcept            = default;
-    Delegate& operator=(const Delegate& o)     = default;
+    Delegate()                      = default;
+    Delegate(const Delegate& o)     = default;
+    Delegate(Delegate&& o) noexcept = default;
+    Delegate& operator=(const Delegate& o) = default;
     Delegate& operator=(Delegate&& o) noexcept = default;
     ~Delegate()                                = default;
 
@@ -50,71 +71,50 @@ public:
     const void* data() const noexcept { return reference; }
     decltype(auto) fn() const noexcept { return function; }
 
-    template <typename R>
-    void connect(R& v) noexcept {
-        reference = static_cast<const void*>(std::addressof(v));
-        function  = [](const void* r, As... as) -> decltype(auto) {
-            static_assert(
-                std::is_invocable_r_v<T, R, As...>,
-                "Connect called with function that does not satisfy func signature of `Delegate`");
-
-            constexpr auto is_const    = std::is_const_v<R>;
-            using nonconst_return_type = decltype(std::invoke(std::declval<R>(), std::forward<As>(as)...));
-            using const_return_type =
-                decltype(std::invoke(std::declval<std::add_const_t<R>>(), std::forward<As>(as)...));
-
-            constexpr auto same_t_nonconst        = std::is_same_v<nonconst_return_type, T>;
-            constexpr auto same_t_const           = std::is_same_v<const_return_type, T>;
-            constexpr auto convertible_t_nonconst = std::is_convertible_v<nonconst_return_type, T>;
-
-            using converted_ptr_type = std::conditional_t<
-                !is_const && (same_t_nonconst || (!same_t_const && convertible_t_nonconst)),
-                R*,
-                const R*>;
-
-            auto& callable = *static_cast<converted_ptr_type>(const_cast<void*>(r));
-            if constexpr (same_t_const || same_t_nonconst) {
-                return std::invoke(callable, std::forward<As>(as)...);
-            } else { // do conversion here.
-                return T{ std::invoke(callable, std::forward<As>(as)...) };
-            }
-        };
-    }
-
-    template <auto F_Ptr, typename R>
-    void connect(R& v) noexcept {
-        reference = static_cast<const void*>(std::addressof(v));
-        function  = [](const void* r, As... as) -> decltype(auto) {
-            static_assert(
-                std::is_invocable_r_v<T, decltype(F_Ptr), R, As...>,
-                "Connect called with function that does not satisfy func signature of `Delegate`");
-
-            constexpr auto is_const    = std::is_const_v<R>;
-            using nonconst_return_type = decltype(std::invoke(F_Ptr, std::declval<R>(), std::forward<As>(as)...));
-            using const_return_type =
-                decltype(std::invoke(F_Ptr, std::declval<std::add_const_t<R>>(), std::forward<As>(as)...));
-
-            constexpr auto same_t_nonconst        = std::is_same_v<nonconst_return_type, T>;
-            constexpr auto same_t_const           = std::is_same_v<const_return_type, T>;
-            constexpr auto convertible_t_nonconst = std::is_convertible_v<nonconst_return_type, T>;
-
-            using converted_ptr_type = std::conditional_t<
-                !is_const && (same_t_nonconst || (!same_t_const && convertible_t_nonconst)),
-                R*,
-                const R*>;
-
-            auto& callable = *static_cast<converted_ptr_type>(const_cast<void*>(r));
-            if constexpr (same_t_const || same_t_nonconst) {
-                return std::invoke(F_Ptr, callable, std::forward<As>(as)...);
-            } else { // do conversion here.
-                return T{ std::invoke(F_Ptr, callable, std::forward<As>(as)...) };
-            }
-        };
-    }
-
     void reset() noexcept {
         reference = nullptr;
         function  = nullptr;
+    }
+
+private:
+    template <auto... F, typename R>
+    void connect_impl(R& v) noexcept {
+        reset();
+
+        constexpr auto is_correct_signature = std::is_invocable_r_v<T, decltype(F)..., R, As...>;
+        constexpr auto is_function_ptr      = is_correct_signature && !std::is_pointer_v<std::decay_t<R>>;
+        static_assert(
+            is_correct_signature,
+            "Connect called with function that does not satisfy func signature of `Delegate`");
+        static_assert(
+            is_function_ptr,
+            "Function pointers are not defined when cast to `void*`. Use connect<&F> instead");
+
+        if constexpr (is_function_ptr) {
+            reference = static_cast<const void*>(std::addressof(v));
+            function  = [](const void* r, As... as) -> decltype(auto) {
+                constexpr auto is_const    = std::is_const_v<R>;
+                using nonconst_return_type = decltype(std::invoke(F..., std::declval<R>(), std::forward<As>(as)...));
+                using const_return_type =
+                    decltype(std::invoke(F..., std::declval<std::add_const_t<R>>(), std::forward<As>(as)...));
+
+                constexpr auto same_t_nonconst        = std::is_same_v<nonconst_return_type, T>;
+                constexpr auto same_t_const           = std::is_same_v<const_return_type, T>;
+                constexpr auto convertible_t_nonconst = std::is_convertible_v<nonconst_return_type, T>;
+
+                using converted_ptr_type = std::conditional_t<
+                    !is_const && (same_t_nonconst || (!same_t_const && convertible_t_nonconst)),
+                    R*,
+                    const R*>;
+
+                auto& callable = *static_cast<converted_ptr_type>(const_cast<void*>(r));
+                if constexpr (same_t_const || same_t_nonconst) {
+                    return std::invoke(F..., callable, std::forward<As>(as)...);
+                } else { // do conversion here.
+                    return T{ std::invoke(F..., callable, std::forward<As>(as)...) };
+                }
+            };
+        }
     }
 
 private:
