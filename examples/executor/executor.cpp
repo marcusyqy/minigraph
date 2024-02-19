@@ -4,16 +4,23 @@
 #include <iostream>
 
 struct Add {
-    double operator()(double x, double y) const { return x + y; }
+    double operator()(double x, double y) const {
+        std::cout << "Add is called" << std::endl;
+        return x + y;
+    }
 };
 
 struct Multiply {
-    double operator()(double x, double y) const { return x * y; }
+    double operator()(double x, double y) const {
+        std::cout << "Multiply is called" << std::endl;
+        return x * y;
+    }
 };
 
 int main(int argc, char** argv) {
     using namespace mini;
-    // stable API so we don't need C++17
+    // Reactive_Executor react;
+
     auto x    = edge(5.0);
     double aa = 1.0;
     auto y    = edge(aa);
