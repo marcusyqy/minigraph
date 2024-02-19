@@ -65,20 +65,21 @@ int main(int argc, char** argv) {
     auto c = Class(1, 4);
 
     auto default_round_bracket = Function("default operator()");
-    mini::Delegate<int(Class &&)> fn_ref_default{ default_round_bracket };
-    std::cout << "result from " << fn_ref_default(Class(3, 1)) << std::endl;
+    mini::Delegate<int(Class &&)> delegate_default{ default_round_bracket };
+    std::cout << "result from " << delegate_default(Class(3, 1)) << std::endl;
 
     auto connect_in_place = Function("connect_in_place");
-    mini::Delegate<int(Class &&)> fn_ref_inplace{ mini::connect<&Function::foo>, connect_in_place };
-    std::cout << "result from " << fn_ref_inplace(std::move(c)) << std::endl;
+    mini::Delegate<int(Class &&)> delegate_inplace{ mini::connect<&Function::foo>, connect_in_place };
+    std::cout << "result from " << delegate_inplace(std::move(c)) << std::endl;
 
     auto ref = Function("overload");
-    mini::Delegate<double(Class &&)> fn_ref_ref{ ref };
-    std::cout << "result from " << fn_ref_ref(std::move(c)) << std::endl;
+    mini::Delegate<double(Class &&)> delegate_ref{ ref };
+    std::cout << "result from " << delegate_ref(std::move(c)) << std::endl;
 
-    fn_ref_ref.connect<&Function::foo>(connect_in_place);
-    std::cout << "result from after connect " << fn_ref_ref(std::move(c)) << std::endl;
+    delegate_ref.connect<&Function::foo>(connect_in_place);
+    std::cout << "result from after connect " << delegate_ref(std::move(c)) << std::endl;
 
-    fn_ref_ref.connect(default_round_bracket); // notice the return type changes from double to int not by conversion.
-    std::cout << "result from after connect " << fn_ref_ref(std::move(c)) << std::endl;
+    delegate_default.connect(
+        default_round_bracket); // notice the return type changes from double to int not by conversion.
+    std::cout << "result from after connect " << delegate_ref(std::move(c)) << std::endl;
 }
