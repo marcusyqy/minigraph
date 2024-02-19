@@ -87,9 +87,6 @@ int main(int argc, char** argv) {
     mini::Delegate<double(Class &&)> delegate_ref{ ref };
     std::cout << "result from " << delegate_ref(std::move(c)) << std::endl;
 
-    //delegate_ref.connect<&Function::foo>(connect_in_place);
-    //std::cout << "result from after connect " << delegate_ref(std::move(c)) << std::endl;
-
     delegate_default.connect(default_round_bracket); // notice the return type changes from double to int not by conversion.
     std::cout << "result from after connect " << delegate_ref(std::move(c)) << std::endl;
 
@@ -103,11 +100,9 @@ int main(int argc, char** argv) {
     free_func(1, 2.0, "hello", Class(1, 2));
     
     #if FUNC_SIG_EXAMPLE
-    {
-        mini::Delegate<double(int, double, std::string, const Class&)> nc {hoo}; // NC
-        nc(1, 2.0, "hello", Class(1, 2));
-        nc.connect<goo>();
-        nc(1, 2.0, "hello", Class(1, 2));
-    }
+    mini::Delegate<double(int, double, std::string, const Class&)> nc {hoo}; // NC
+    nc(1, 2.0, "hello", Class(1, 2));
+    nc.connect<goo>();
+    nc(1, 2.0, "hello", Class(1, 2));
     #endif 
 }
