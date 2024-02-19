@@ -54,10 +54,14 @@ public:
     void connect(R& v) noexcept {
         reference = static_cast<const void*>(std::addressof(v));
         function  = [](const void* r, As... as) -> decltype(auto) {
-            static_assert(std::is_invocable_r_v<T, R, As...>, "Must be invokable!!");
+            static_assert(
+                std::is_invocable_r_v<T, R, As...>,
+                "Connect called with function that does not satisfy func signature of `Delegate`");
+
             constexpr auto is_const    = std::is_const_v<R>;
-            using nonconst_return_type = decltype(std::declval<R>()(std::forward<As>(as)...));
-            using const_return_type    = decltype(std::declval<std::add_const_t<R>>()(std::forward<As>(as)...));
+            using nonconst_return_type = decltype(std::invoke(std::declval<R>(), std::forward<As>(as)...));
+            using const_return_type =
+                decltype(std::invoke(std::declval<std::add_const_t<R>>(), std::forward<As>(as)...));
 
             constexpr auto same_t_nonconst        = std::is_same_v<nonconst_return_type, T>;
             constexpr auto same_t_const           = std::is_same_v<const_return_type, T>;
