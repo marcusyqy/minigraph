@@ -1,8 +1,10 @@
 #pragma once
+#include "fwd.hpp"
 #include <cassert>
 #include <functional>
 #include <iostream>
 #include <utility>
+
 
 namespace mini {
 

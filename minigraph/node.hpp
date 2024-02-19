@@ -1,4 +1,5 @@
 #pragma once
+#include "fwd.hpp"
 #include "edge.hpp"
 #include "meta.hpp"
 #include <tuple>

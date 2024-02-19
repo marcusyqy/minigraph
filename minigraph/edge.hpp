@@ -1,4 +1,5 @@
 #pragma once
+#include "fwd.hpp"
 #include "meta.hpp"
 #include <type_traits>
 #include <utility>
@@ -80,10 +81,8 @@ private:
 };
 
 // API
-#if __cplusplus >= 201703L // if more than c++17
 template <typename T>
 Edge(T a) -> Edge<T>;
-#endif
 
 template <typename T>
 Edge<T> edge(const T& o) {
