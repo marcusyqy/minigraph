@@ -28,7 +28,6 @@ int main(int argc, char** argv) {
     e = x1;
     b = e;
 
-    auto bb{ e };
-
+    [[maybe_unused]] auto bb{ e };
     return 0;
 }

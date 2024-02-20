@@ -1,6 +1,6 @@
 #pragma once
-#include "fwd.hpp"
 #include "edge.hpp"
+#include "fwd.hpp"
 #include "meta.hpp"
 #include <tuple>
 
@@ -83,7 +83,7 @@ private:
     template <size_t... Is, size_t... Os>
     void apply(std::index_sequence<Is...>, std::index_sequence<Os...>) {
         auto immediate = callable(std::get<Is>(inputs).get()...);
-        // @TODO: we have to change
+
         if constexpr (meta::is_tuple_like<meta::detail::Return_Type<T>>) {
             (..., static_cast<void>(meta::get<Os>(outputs) = meta::get<Os>(immediate)));
         } else {
@@ -92,17 +92,14 @@ private:
     }
 
     template <size_t... Is, size_t... Os>
-    static decltype(auto)
+    static meta::detail::Node_Output<T>
         init(T& callable, meta::detail::Node_Input<T>& inputs, std::index_sequence<Is...>, std::index_sequence<Os...>) {
-        auto immediate                       = callable(std::get<Is>(inputs).get()...);
-        meta::detail::Node_Output<T> outputs = {};
-        // @TODO: we have to change
+        auto immediate = callable(std::get<Is>(inputs).get()...);
         if constexpr (meta::is_tuple_like<meta::detail::Return_Type<T>>) {
-            (..., static_cast<void>(meta::get<Os>(outputs) = meta::get<Os>(immediate)));
+            return { meta::get<Os>(immediate)... };
         } else {
-            meta::get<0>(outputs) = immediate;
+            return { immediate };
         }
-        return outputs;
     }
 
 private:
@@ -111,8 +108,6 @@ private:
     meta::detail::Node_Output<T> outputs;
 };
 
-/// make a tuple-like check for the struct
-/// for default initialized edges.
 template <typename T, typename... Args>
 decltype(auto) node(meta::detail::Node_Input<T> o, Args&&... args) {
     return Node<T>{ o, std::forward<Args&&>(args)... };

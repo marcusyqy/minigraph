@@ -27,7 +27,6 @@ private:
     int y;
 };
 
-
 class Function {
 public:
     int operator()(Class&& c) const {
@@ -64,12 +63,12 @@ private:
 
 double goo(int, double, std::string, const Class&) {
     std::cout << "goo is called" << std::endl;
-return 0.0;
+    return 0.0;
 }
 
 double hoo(int, double, std::string, const Class&) {
     std::cout << "hoo is called" << std::endl;
-return 0.1;
+    return 0.1;
 }
 
 int main(int argc, char** argv) {
@@ -87,22 +86,22 @@ int main(int argc, char** argv) {
     mini::Delegate<double(Class &&)> delegate_ref{ ref };
     std::cout << "result from " << delegate_ref(std::move(c)) << std::endl;
 
-    delegate_default.connect(default_round_bracket); // notice the return type changes from double to int not by conversion.
+    delegate_default.connect(
+        default_round_bracket); // notice the return type changes from double to int not by conversion.
     std::cout << "result from after connect " << delegate_ref(std::move(c)) << std::endl;
 
     delegate_inplace.connect<&Function::foo>(default_round_bracket);
-    std::cout << "result from after connect " << delegate_inplace(Class(40,50)) << std::endl;
+    std::cout << "result from after connect " << delegate_inplace(Class(40, 50)) << std::endl;
 
-
-    mini::Delegate<double(int, double, std::string, const Class&)> free_func {mini::connect<goo>};
+    mini::Delegate<double(int, double, std::string, const Class&)> free_func{ mini::connect<goo> };
     free_func(1, 2.0, "hello", Class(1, 2));
     free_func.connect<hoo>();
     free_func(1, 2.0, "hello", Class(1, 2));
-    
-    #if FUNC_SIG_EXAMPLE
-    mini::Delegate<double(int, double, std::string, const Class&)> nc {hoo}; // NC
+
+#if FUNC_SIG_EXAMPLE
+    mini::Delegate<double(int, double, std::string, const Class&)> nc{ hoo }; // NC
     nc(1, 2.0, "hello", Class(1, 2));
     nc.connect<goo>();
     nc(1, 2.0, "hello", Class(1, 2));
-    #endif 
+#endif
 }

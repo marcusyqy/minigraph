@@ -5,7 +5,6 @@
 #include <iostream>
 #include <utility>
 
-
 namespace mini {
 
 template <typename>
@@ -54,10 +53,10 @@ public:
     template <typename R>
     Delegate(T (*fn)(As...)) : function(fn) {}
 
-    Delegate()                      = default;
-    Delegate(const Delegate& o)     = default;
-    Delegate(Delegate&& o) noexcept = default;
-    Delegate& operator=(const Delegate& o) = default;
+    Delegate()                                 = default;
+    Delegate(const Delegate& o)                = default;
+    Delegate(Delegate&& o) noexcept            = default;
+    Delegate& operator=(const Delegate& o)     = default;
     Delegate& operator=(Delegate&& o) noexcept = default;
     ~Delegate()                                = default;
 

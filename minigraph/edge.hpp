@@ -72,7 +72,7 @@ public:
             return static_cast<const Edge<TT>*>(p)->get();
         } } {}
 
-    T get() const { return converter(reference); }
+    decltype(auto) get() const { return converter(reference); }
 
 private:
     const void* reference;

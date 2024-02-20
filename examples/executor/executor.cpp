@@ -19,59 +19,25 @@ struct Multiply {
 
 int main(int argc, char** argv) {
     using namespace mini;
-    // Reactive_Executor react;
+    // Executor react; // @TODO: figure out how to incorporate this
 
-    auto x    = edge(5.0);
+    auto x    = Edge(5.0);
     double aa = 1.0;
-    auto y    = edge(aa);
+    auto y    = Edge(aa);
 
-    auto add_node      = node<Add>({ x, y });
+    auto add_node      = Node<Add>({ x, y });
     auto& [add_result] = add_node.edges();
 
-    auto z             = edge<double>(7.0);
-    auto mul_node      = node<Multiply>({ z, add_result });
+    auto z             = Edge<double>(7.0);
+    auto mul_node      = Node<Multiply>({ z, add_result });
     auto& [mul_result] = mul_node.edges();
 
-    std::cout << "before add" << std::endl;
-    std::cout << "=============================================================" << std::endl;
-    std::cout << "x : " << x.get() << std::endl;
-    std::cout << "y : " << y.get() << std::endl;
-    std::cout << "z : " << z.get() << std::endl;
-    std::cout << "x+y : " << add_result.get() << std::endl;
-    std::cout << "(x+y)*z : " << mul_result.get() << std::endl;
-    std::cout << "=============================================================" << std::endl;
+    x = 4.0; // this update should cause one run.
+    y = 8.0; // this update should cause another run.
 
-    x = 4.0;
-    y = 8.0;
-
-    std::cout << "before add change to x and y" << std::endl;
-    std::cout << "=============================================================" << std::endl;
-    std::cout << "x : " << x.get() << std::endl;
-    std::cout << "y : " << y.get() << std::endl;
-    std::cout << "z : " << z.get() << std::endl;
-    std::cout << "x+y : " << add_result.get() << std::endl;
-    std::cout << "(x+y)*z : " << mul_result.get() << std::endl;
-    std::cout << "=============================================================" << std::endl;
-
-    add_node();
-    std::cout << "after add:before mul" << std::endl;
-    std::cout << "=============================================================" << std::endl;
-    std::cout << "x : " << x.get() << std::endl;
-    std::cout << "y : " << y.get() << std::endl;
-    std::cout << "z : " << z.get() << std::endl;
-    std::cout << "x+y : " << add_result.get() << std::endl;
-    std::cout << "(x+y)*z : " << mul_result.get() << std::endl;
-    std::cout << "=============================================================" << std::endl;
-
-    mul_node();
-    std::cout << "after mul" << std::endl;
-    std::cout << "=============================================================" << std::endl;
-    std::cout << "x : " << x.get() << std::endl;
-    std::cout << "y : " << y.get() << std::endl;
-    std::cout << "z : " << z.get() << std::endl;
-    std::cout << "x+y : " << add_result.get() << std::endl;
-    std::cout << "(x+y)*z : " << mul_result.get() << std::endl;
-    std::cout << "=============================================================" << std::endl;
+    // these should be automatic.
+    // add_node();
+    // mul_node();
 
     return 0;
 }
