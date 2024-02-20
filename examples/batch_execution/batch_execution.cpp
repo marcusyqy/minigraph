@@ -27,10 +27,10 @@ public:
     }
 
     // for locking.
-    void begin_batch() { blocked = true;}
-    void end_batch() { 
+    void begin_batch() { blocked = true; }
+    void end_batch() {
         blocked = false;
-        for(auto& node : nodes) {
+        for (auto& node : nodes) {
             node.second();
         }
     }
@@ -38,7 +38,7 @@ public:
 private:
     template <typename T>
     void callback(mini::Node<T>& node) {
-        if(!blocked) {
+        if (!blocked) {
             node();
         } else {
             nodes[static_cast<const void*>(&node)] = node;

@@ -8,19 +8,86 @@
 
 namespace mini {
 
+namespace detail {
+
+template <typename T, typename = void>
+class Edge_Storage {
+public:
+    template <typename... TArgs>
+    Edge_Storage(TArgs&&... args) : value{ std::forward<TArgs&&>(args)... } {}
+    Edge_Storage(const T& o) : value{ o } {}
+    Edge_Storage(T&& o) : value{ std::move(o) } {}
+    Edge_Storage& operator=(const T& o) {
+        std::destroy_at(std::addressof(value));
+        new (&value) T{ o };
+        return *this;
+    }
+    Edge_Storage& operator=(T&& o) {
+        std::destroy_at(std::addressof(value));
+        new (&value) T{ std::move(o) };
+        return *this;
+    }
+
+    template <typename TT>
+    Edge_Storage(const Edge_Storage<TT>& o) : value{ o.value } {}
+    template <typename TT>
+    Edge_Storage(Edge_Storage<TT>&& o) : value{ std::move(o.value) } {}
+    template <typename TT>
+    Edge_Storage& operator=(const Edge_Storage<TT>& o) {
+        value = o.value;
+        return *this;
+    }
+    template <typename TT>
+    Edge_Storage& operator=(Edge_Storage<TT>&& o) {
+        value = std::move(o.value);
+        return *this;
+    }
+
+    const T& operator*() const { return value; }
+    const T& get() const { return value; }
+
+private:
+    template <typename, typename>
+    friend class Edge_Storage;
+    T value;
+};
+
+template <typename T>
+class Edge_Storage<T, std::enable_if_t<std::is_reference_v<T>, void>> {
+public:
+    Edge_Storage(std::add_const_t<T> o) : value{ std::addressof(o) } {}
+    Edge_Storage& operator=(std::add_const_t<T> o) {
+        value = std::addressof(o);
+        return *this;
+    }
+
+    // these can be way better but let's not do anything more with it now
+    Edge_Storage(const Edge_Storage& o) : value{ o.value } {}
+    Edge_Storage& operator=(const Edge_Storage& o) {
+        value = o.value;
+        return *this;
+    }
+
+    const T& operator*() const { return *value; }
+    const T& get() const { return *value; }
+
+private:
+    std::add_pointer_t<std::remove_reference_t<T>> value;
+};
+} // namespace detail
+
 template <typename T>
 class Edge {
 public:
     // @TODO(Marcus): we probably need to check for constness and all.
-    using value_type      = T;
-    using reference       = T&;
-    using const_reference = const T&;
+    using value_type       = T;
+    using reference        = std::remove_reference_t<T>&;
+    using const_reference  = const std::decay_t<T>&;
+    using rvalue_reference = std::decay_t<T>&&;
 
-    operator reference() { return value; }
-    operator const_reference() const { return value; }
-
-    reference get() { return value; }
-    const_reference get() const { return value; }
+    operator const_reference() const { return *value; }
+    const_reference get() const { return *value; }
+    const_reference operator*() const { return get(); }
 
     Edge() = default;
 
@@ -49,24 +116,34 @@ public:
     }
 
     // actual types
-    Edge(const T& o) : value{ o } {
+    Edge(const_reference o) : value{ o } {
         // don't need to broadcast this since this is initial value
         // broadcast();
     }
 
-    Edge(T&& o) : value{ std::move(o) } {
+    Edge(rvalue_reference o) : value{ std::move(o) } {
         // don't need to broadcast this since this is initial value
         // broadcast();
     }
-    Edge& operator=(const T& o) {
+    Edge& operator=(const_reference o) {
         value = o;
         broadcast();
         return *this;
     }
-    Edge& operator=(T&& o) {
+    Edge& operator=(rvalue_reference o) {
         value = std::move(o);
         broadcast();
         return *this;
+    }
+
+    void set(const_reference o) {
+        value = o;
+        broadcast();
+    }
+
+    void set(rvalue_reference o) {
+        value = std::move(o);
+        broadcast();
     }
 
     void on_changed(mini::Delegate<void()> delegate) { on_changed_listeners.emplace_back(std::move(delegate)); }
@@ -82,7 +159,7 @@ public:
 private:
     template <typename TT>
     friend class Edge;
-    T value;
+    detail::Edge_Storage<T> value;
 
     // we can change this to not vector.
     std::vector<Delegate<void()>> on_changed_listeners;
@@ -114,8 +191,8 @@ public:
 
 private:
     void* reference;
-    using Converter_Function = T (*)(void*);
-    using On_Changed_Function    = void (*)(void*, mini::Delegate<void()>);
+    using Converter_Function  = T (*)(void*);
+    using On_Changed_Function = void (*)(void*, mini::Delegate<void()>);
 
     Converter_Function converter;
     On_Changed_Function on_changed_fn;

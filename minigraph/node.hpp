@@ -94,20 +94,20 @@ private:
     void apply(std::index_sequence<Is...>, std::index_sequence<Os...>) {
         auto immediate = callable(std::get<Is>(inputs).get()...);
         if constexpr (meta::is_tuple_like<meta::detail::Return_Type<T>>) {
-            (..., static_cast<void>(meta::get<Os>(outputs) = meta::get<Os>(immediate)));
+            (..., static_cast<void>(meta::get<Os>(outputs) = std::move(meta::get<Os>(immediate))));
         } else {
-            meta::get<0>(outputs) = immediate;
+            meta::get<0>(outputs) = std::move(immediate);
         }
     }
 
     template <size_t... Is, size_t... Os>
     static meta::detail::Node_Output<T>
         init(T& callable, meta::detail::Node_Input<T>& inputs, std::index_sequence<Is...>, std::index_sequence<Os...>) {
-        auto immediate = callable(std::get<Is>(inputs).get()...);
         if constexpr (meta::is_tuple_like<meta::detail::Return_Type<T>>) {
+            auto immediate = std::invoke(callable, std::get<Is>(inputs).get()...);
             return { meta::get<Os>(immediate)... };
         } else {
-            return { immediate };
+            return { std::invoke(callable, std::get<Is>(inputs).get()...) };
         }
     }
 

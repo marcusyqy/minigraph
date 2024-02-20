@@ -23,13 +23,13 @@ template <typename T>
 constexpr auto is_tuple_like = Is_Tuple_Like<T>::value;
 
 // @TODO: make it work for anything that can use above Element_Indexer and etc.
-template <typename T, typename = std::enable_if_t<!is_tuple_like<T>, void>>
+template <typename T>
 struct Decompose_Into_Type_List_Impl {
     using type = Type_List<T>;
 };
 
 template <typename... Ts>
-struct Decompose_Into_Type_List_Impl<std::tuple<Ts...>, void> {
+struct Decompose_Into_Type_List_Impl<std::tuple<Ts...>> {
     using type = Type_List<Ts...>;
 };
 
