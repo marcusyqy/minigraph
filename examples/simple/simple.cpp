@@ -11,7 +11,7 @@ struct Not_Convertible_To_Int {
     float value;
 };
 
-int main(int argc, char** argv) {
+int main() {
     mini::Edge<Convertible_To_Int> x1{ Convertible_To_Int{ 4.1f } };
     mini::Edge<Not_Convertible_To_Int> x2{ Not_Convertible_To_Int{ 4.1f } };
     mini::Relaxed_Edge<int> y1{ x1 };

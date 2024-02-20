@@ -11,7 +11,7 @@ struct Multiply {
     double operator()(double x, double y) const { return x * y; }
 };
 
-int main(int argc, char** argv) {
+int main() {
 #if operators_defined
     using namespace mini;
     auto x = edge(5.0);

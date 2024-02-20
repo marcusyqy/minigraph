@@ -33,7 +33,7 @@ private:
     }
 };
 
-int main(int argc, char** argv) {
+int main() {
     using namespace mini;
     Immediate_Executor executor; // @TODO: figure out how to incorporate this
 

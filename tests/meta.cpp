@@ -19,7 +19,7 @@ struct C4 {
 
 void foo(int) {}
 
-int main(int argc, char** argv) {
+int main() {
     std::cout << "tests starting" << std::endl;
     auto xx = mini::meta::Callable_Traits<decltype(&foo)>{};
     auto x1 = mini::meta::Callable_Traits<C1>{};

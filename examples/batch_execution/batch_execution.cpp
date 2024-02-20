@@ -49,7 +49,7 @@ private:
     std::unordered_map<const void*, mini::Delegate<void()>> nodes;
 };
 
-int main(int argc, char** argv) {
+int main() {
     using namespace mini;
     Batch_Executor executor; // @TODO: figure out how to incorporate this
 

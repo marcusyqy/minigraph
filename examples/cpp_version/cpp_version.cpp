@@ -1,7 +1,7 @@
 #include <cassert>
 #include <iostream>
 
-int main(int argc, char** argv) {
+int main() {
     // only for c++17
     if (__cplusplus == 202101L) std::cout << "C++23";
     else if (__cplusplus == 202002L)

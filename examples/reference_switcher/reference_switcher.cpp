@@ -49,7 +49,7 @@ private:
 
 } // namespace my
 
-int main(int argc, char** argv) {
+int main() {
     my::Immediate_Executor immediate_executor;
     // 1
     auto x1 = mini::Edge(5.0);

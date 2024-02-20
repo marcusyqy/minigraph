@@ -71,7 +71,7 @@ double hoo(int, double, std::string, const Class&) {
     return 0.1;
 }
 
-int main(int argc, char** argv) {
+int main() {
     auto c = Class(1, 4);
 
     auto default_round_bracket = Function("default operator()");
