@@ -71,7 +71,7 @@ public:
                 std::make_index_sequence<meta::detail::Params<T>::size>{},
                 std::make_index_sequence<meta::detail::Returns<T>::size>{})
         } {
-        listen_to_edges(std::make_index_sequence<meta::detail::Params<T>::size>{});
+        attach_callback_to_edges(std::make_index_sequence<meta::detail::Params<T>::size>{});
     }
 
     void operator()() {
@@ -87,7 +87,7 @@ public:
     operator bool() const noexcept { return out_of_sync; }
     [[nodiscard]] bool outdated() const noexcept { return out_of_sync; }
 
-    void listen(Delegate<void(Node&)> delegate) { outdated_listeners.emplace_back(std::move(delegate)); }
+    void on_outdated(Delegate<void(Node&)> delegate) { outdated_listeners.emplace_back(std::move(delegate)); }
 
 private:
     template <size_t... Is, size_t... Os>
@@ -120,10 +120,10 @@ private:
     }
 
     template <size_t... Is>
-    void listen_to_edges(std::index_sequence<Is...>) {
+    void attach_callback_to_edges(std::index_sequence<Is...>) {
         (..., [&]() {
             auto& input = std::get<Is>(inputs);
-            input.listen({ connect<&Node::callback<Is>>, *this });
+            input.on_changed({ connect<&Node::callback<Is>>, *this });
         }());
     }
 

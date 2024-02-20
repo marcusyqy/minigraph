@@ -69,7 +69,7 @@ public:
         return *this;
     }
 
-    void listen(mini::Delegate<void()> delegate) { on_changed_listeners.emplace_back(std::move(delegate)); }
+    void on_changed(mini::Delegate<void()> delegate) { on_changed_listeners.emplace_back(std::move(delegate)); }
 
     void broadcast() {
         for (auto& on_changed : on_changed_listeners) {
@@ -98,8 +98,8 @@ public:
             static_assert(std::is_convertible_v<TT, T>, "Must be convertible to other type");
             return static_cast<const Edge<TT>*>(p)->get();
         } },
-        listen_fn(+[](void* p, mini::Delegate<void()> delegate) {
-            static_cast<Edge<TT>*>(p)->listen(std::move(delegate));
+        on_changed_fn(+[](void* p, mini::Delegate<void()> delegate) {
+            static_cast<Edge<TT>*>(p)->on_changed(std::move(delegate));
         }) {}
 
     decltype(auto) get() const {
@@ -107,18 +107,18 @@ public:
         return converter(reference);
     }
 
-    void listen(mini::Delegate<void()> delegate) {
-        assert(listen_fn);
-        listen_fn(reference, std::move(delegate));
+    void on_changed(mini::Delegate<void()> delegate) {
+        assert(on_changed_fn);
+        on_changed_fn(reference, std::move(delegate));
     }
 
 private:
     void* reference;
     using Converter_Function = T (*)(void*);
-    using Listen_Function    = void (*)(void*, mini::Delegate<void()>);
+    using On_Changed_Function    = void (*)(void*, mini::Delegate<void()>);
 
     Converter_Function converter;
-    Listen_Function listen_fn;
+    On_Changed_Function on_changed_fn;
 };
 
 // API

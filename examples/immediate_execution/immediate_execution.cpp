@@ -22,8 +22,8 @@ struct Multiply {
 class Immediate_Executor {
 public:
     template <typename T>
-    void listen(mini::Node<T>& node) {
-        node.listen({ mini::connect<&Immediate_Executor::callback<T>>, *this });
+    void attach_callback(mini::Node<T>& node) {
+        node.on_outdated({ mini::connect<&Immediate_Executor::callback<T>>, *this });
     }
 
 private:
@@ -49,8 +49,8 @@ int main(int argc, char** argv) {
     auto mul_node      = Node<Multiply>({ z, add_result });
     auto& [mul_result] = mul_node.edges();
 
-    executor.listen(add_node);
-    executor.listen(mul_node);
+    executor.attach_callback(add_node);
+    executor.attach_callback(mul_node);
 
     auto print_state = [&] {
         std::cout << "=============================================================" << std::endl;
@@ -72,10 +72,6 @@ int main(int argc, char** argv) {
     y = 8.0; // this update should cause another run.
     std::cout << "after y assignment:" << std::endl;
     print_state();
-
-    // these should be automatic.
-    // add_node();
-    // mul_node();
 
     return 0;
 }
