@@ -100,15 +100,15 @@ private:
         reset();
 
         constexpr auto is_correct_signature = std::is_invocable_r_v<T, decltype(F)..., R, As...>;
-        constexpr auto is_function_ptr      = is_correct_signature && !std::is_pointer_v<std::decay_t<R>>;
+        constexpr auto is_not_function_ptr  = is_correct_signature && !std::is_pointer_v<std::decay_t<R>>;
         static_assert(
             is_correct_signature,
             "Connect called with function that does not satisfy func signature of `Delegate`");
         static_assert(
-            is_function_ptr,
+            is_not_function_ptr,
             "Function pointers are not defined when cast to `void*`. Use connect<&F> instead");
 
-        if constexpr (is_function_ptr) {
+        if constexpr (is_not_function_ptr) {
             reference = static_cast<const void*>(std::addressof(v));
             function  = [](const void* r, As... as) -> decltype(auto) {
                 constexpr auto is_const = std::is_const_v<R>;
