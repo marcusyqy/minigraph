@@ -1,8 +1,10 @@
 #pragma once
+#include "delegate.hpp"
 #include "fwd.hpp"
 #include "meta.hpp"
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace mini {
 
@@ -34,50 +36,95 @@ public:
     template <typename TT, bool = std::is_same_v<TT, T> || std::is_convertible_v<TT, T>>
     Edge& operator=(const Edge<TT>& o) {
         value = o.value;
+        broadcast();
         return *this;
     }
 
     template <typename TT, bool = std::is_same_v<TT, T> || std::is_convertible_v<TT, T>>
     Edge& operator=(Edge<TT>&& o) {
+        o.reset();
         value = std::move(o.value);
+        broadcast();
         return *this;
     }
 
     // actual types
-    Edge(const T& o) : value{ o } {}
-    Edge(T&& o) : value{ std::move(o) } {}
+    Edge(const T& o) : value{ o } {
+        // don't need to broadcast this since this is initial value
+        // broadcast();
+    }
+
+    Edge(T&& o) : value{ std::move(o) } {
+        // don't need to broadcast this since this is initial value
+        // broadcast();
+    }
     Edge& operator=(const T& o) {
         value = o;
+        broadcast();
         return *this;
     }
     Edge& operator=(T&& o) {
         value = std::move(o);
+        broadcast();
         return *this;
     }
+
+    void connect(mini::Delegate<void()> delegate) { on_changed_listeners.emplace_back(std::move(delegate)); }
+
+    template <auto Fn, typename... R>
+    void connect(R&&... r) { // lazy
+        on_changed_listeners.emplace_back(mini::connect<Fn>, std::forward<R&&>(r)...);
+    }
+
+    void broadcast() {
+        for (auto& on_changed : on_changed_listeners) {
+            on_changed();
+        }
+    }
+
+    void reset() { on_changed_listeners.clear(); }
 
 private:
     template <typename TT>
     friend class Edge;
     T value;
+
+    // we can change this to not vector.
+    std::vector<Delegate<void()>> on_changed_listeners;
 };
 
 template <typename T>
 class Relaxed_Edge { // should this be renamed as `Reference_Edge`?
 public:
     template <typename TT>
-    Relaxed_Edge(const Edge<TT>& o) :
-        reference{ static_cast<const void*>(&o) }, converter{ +[](const void* p) -> T {
+    Relaxed_Edge(Edge<TT>& o) :
+        reference{ static_cast<void*>(&o) }, converter{ +[](void* p) -> T {
             // @TODO(Marcus): we should make the error message in this portion better.
             static_assert(std::is_convertible_v<TT, T>, "Must be convertible to other type");
             return static_cast<const Edge<TT>*>(p)->get();
-        } } {}
+        } },
+        connect_fn(+[](void* p, mini::Delegate<void()> delegate) {
+            static_cast<Edge<TT>*>(p)->connect(std::move(delegate));
+        }) {}
 
-    decltype(auto) get() const { return converter(reference); }
+    decltype(auto) get() const {
+        assert(converter);
+        return converter(reference);
+    }
+
+    template <auto Fn, typename... R>
+    void connect(R&&... r) { // lazy
+        assert(connect_fn);
+        connect_fn(reference, { mini::connect<Fn>, std::forward<R&&>(r)... });
+    }
 
 private:
-    const void* reference;
-    using Converter_Function = T (*)(const void*);
+    void* reference;
+    using Converter_Function = T (*)(void*);
+    using Connect_Function   = void (*)(void*, mini::Delegate<void()>);
+
     Converter_Function converter;
+    Connect_Function connect_fn;
 };
 
 // API

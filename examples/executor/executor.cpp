@@ -2,6 +2,7 @@
 #include "minigraph/node.hpp"
 #include <cassert>
 #include <iostream>
+#include <thread>
 
 struct Add {
     double operator()(double x, double y) const {
@@ -17,15 +18,22 @@ struct Multiply {
     }
 };
 
+class Executor {
+public:
+private:
+    std::thread execution_thread;
+};
+
 int main(int argc, char** argv) {
     using namespace mini;
-    // Executor react; // @TODO: figure out how to incorporate this
+    Executor react; // @TODO: figure out how to incorporate this
 
     auto x    = Edge(5.0);
     double aa = 1.0;
     auto y    = Edge(aa);
 
-    auto add_node      = Node<Add>({ x, y });
+    auto add_node = Node<Add>({ x, y });
+
     auto& [add_result] = add_node.edges();
 
     auto z             = Edge<double>(7.0);

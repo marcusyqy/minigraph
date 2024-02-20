@@ -92,27 +92,49 @@ private:
             "Function pointers are not defined when cast to `void*`. Use connect<&F> instead");
 
         if constexpr (is_function_ptr) {
+            struct Dummy {};
+
             reference = static_cast<const void*>(std::addressof(v));
             function  = [](const void* r, As... as) -> decltype(auto) {
-                constexpr auto is_const    = std::is_const_v<R>;
-                using nonconst_return_type = decltype(std::invoke(F..., std::declval<R>(), std::forward<As>(as)...));
-                using const_return_type =
-                    decltype(std::invoke(F..., std::declval<std::add_const_t<R>>(), std::forward<As>(as)...));
+                constexpr auto is_const = std::is_const_v<R>;
+                constexpr bool is_invokable_const =
+                    std::is_invocable_r_v<T, decltype(F)..., std::add_const_t<R>, As...>;
 
+                using nonconst_return_type = decltype(std::invoke(F..., std::declval<R>(), std::forward<As>(as)...));
                 constexpr auto same_t_nonconst        = std::is_same_v<nonconst_return_type, T>;
-                constexpr auto same_t_const           = std::is_same_v<const_return_type, T>;
                 constexpr auto convertible_t_nonconst = std::is_convertible_v<nonconst_return_type, T>;
 
-                using converted_ptr_type = std::conditional_t<
-                    !is_const && (same_t_nonconst || (!same_t_const && convertible_t_nonconst)),
-                    R*,
-                    const R*>;
+                /// @TODO: simplify this logic.
+                /// Right now they are just copy pasted with 1 being const and 1 being not.
+                /// This is to overcome not having a const matched callable while preserving the logic of being able to
+                /// match directly with the const if the func sig is a better match.
+                if constexpr (is_invokable_const) {
+                    using const_return_type =
+                        decltype(std::invoke(F..., std::declval<std::add_const_t<R>>(), std::forward<As>(as)...));
+                    constexpr auto same_t_const = std::is_same_v<const_return_type, T>;
 
-                auto& callable = *static_cast<converted_ptr_type>(const_cast<void*>(r));
-                if constexpr (same_t_const || same_t_nonconst) {
-                    return std::invoke(F..., callable, std::forward<As>(as)...);
-                } else { // do conversion here.
-                    return T{ std::invoke(F..., callable, std::forward<As>(as)...) };
+                    using converted_ptr_type = std::conditional_t<
+                        !is_const && (same_t_nonconst || (!same_t_const && convertible_t_nonconst)),
+                        R*,
+                        const R*>;
+
+                    auto& callable = *static_cast<converted_ptr_type>(const_cast<void*>(r));
+                    if constexpr (same_t_const || same_t_nonconst) {
+                        return std::invoke(F..., callable, std::forward<As>(as)...);
+                    } else { // do conversion here.
+                        return T{ std::invoke(F..., callable, std::forward<As>(as)...) };
+                    }
+                } else {
+                    static_assert(!is_const, "operator() that matches is non_const");
+                    using converted_ptr_type =
+                        std::conditional_t<same_t_nonconst || convertible_t_nonconst, R*, const R*>;
+
+                    auto& callable = *static_cast<converted_ptr_type>(const_cast<void*>(r));
+                    if constexpr (same_t_nonconst) {
+                        return std::invoke(F..., callable, std::forward<As>(as)...);
+                    } else { // do conversion here.
+                        return T{ std::invoke(F..., callable, std::forward<As>(as)...) };
+                    }
                 }
             };
         }

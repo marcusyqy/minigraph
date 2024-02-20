@@ -1,8 +1,11 @@
 #pragma once
+#include "delegate.hpp"
 #include "edge.hpp"
 #include "fwd.hpp"
 #include "meta.hpp"
+#include <iostream>
 #include <tuple>
+#include <vector>
 
 namespace mini {
 
@@ -59,7 +62,6 @@ using Node_Output = Type_List_To_Tuple<Decorate_Type_List_With_Edge<Returns<T>>>
 template <typename T>
 class Node {
 public:
-    // @TODO: add outputs intitalization.
     template <typename... Args>
     Node(meta::detail::Node_Input<T> o, Args&&... args) :
         callable{ std::forward<Args&&>(args)... }, inputs{ o }, outputs{
@@ -68,7 +70,9 @@ public:
                 inputs,
                 std::make_index_sequence<meta::detail::Params<T>::size>{},
                 std::make_index_sequence<meta::detail::Returns<T>::size>{})
-        } {}
+        } {
+        connect_edges(std::make_index_sequence<meta::detail::Params<T>::size>{});
+    }
 
     void operator()() {
         apply(
@@ -83,7 +87,6 @@ private:
     template <size_t... Is, size_t... Os>
     void apply(std::index_sequence<Is...>, std::index_sequence<Os...>) {
         auto immediate = callable(std::get<Is>(inputs).get()...);
-
         if constexpr (meta::is_tuple_like<meta::detail::Return_Type<T>>) {
             (..., static_cast<void>(meta::get<Os>(outputs) = meta::get<Os>(immediate)));
         } else {
@@ -102,10 +105,27 @@ private:
         }
     }
 
+    template <size_t N>
+    void callback() {
+        std::cout << "callback called for : " << N << std::endl;
+        out_of_sync = true;
+    }
+
+    template <size_t... Is>
+    void connect_edges(std::index_sequence<Is...>) {
+        (..., [&]() {
+            auto& input = std::get<Is>(inputs);
+            input.template connect<&Node::callback<Is>>(*this);
+        }());
+    }
+
 private:
     T callable;
     meta::detail::Node_Input<T> inputs;
     meta::detail::Node_Output<T> outputs;
+    std::vector<Delegate<void(Node&)>> outdated_listeners;
+
+    bool out_of_sync = false;
 };
 
 template <typename T, typename... Args>
