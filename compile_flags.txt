@@ -1,2 +1,9 @@
 -std=c++17 
 -I.
+-ldl `sdl2-config --libs`
+-lGL
+`sdl2-config --cflags`
+-lSDL2main 
+-lSDL2 
+-ISDL2 
+-ISDL2main

@@ -9,6 +9,7 @@ EXAMPLES_DIR := examples
 TESTS := tests
 TESTS_DIR := tests
 MINIGRAPH_DIR := minigraph
+IMGUI_DIR := imgui
 
 INCLUDES := -I.
 
@@ -85,7 +86,11 @@ clean:
 
 # ty ChatGPT
 format:
-	@find . -type f \( -name "*.cpp" -o -name "*.hpp" \) -exec $(CLANG_FORMAT) -i {} +
+	@find . -type f \( -name "*.cpp" -o -name "*.hpp" \) -not -path './imgui/*' -exec $(CLANG_FORMAT) -i {} +
+
+
+imgui:
+
 
 # PHONY targets
 .PHONY: all clean
