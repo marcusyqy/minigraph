@@ -14,15 +14,15 @@ struct Multiply {
 int main() {
     using namespace mini;
     // stable API so we don't need C++17
-    auto x    = edge(5.0);
+    auto x    = Edge(5.0);
     double aa = 1.0;
-    auto y    = edge(aa);
+    auto y    = Edge(aa);
 
-    auto add_node      = node<Add>({ x, y });
+    auto add_node      = Node<Add>({ x, y });
     auto& [add_result] = add_node.edges();
 
-    auto z             = edge<double>(7.0);
-    auto mul_node      = node<Multiply>({ z, add_result });
+    auto z             = Edge<double>(7.0);
+    auto mul_node      = Node<Multiply>({ z, add_result });
     auto& [mul_result] = mul_node.edges();
 
     std::cout << "before add" << std::endl;
